@@ -6,7 +6,6 @@ import {
     Flex,
     Icon,
     useColorModeValue,
-    Link,
     Drawer,
     DrawerContent,
     Text,
@@ -14,6 +13,7 @@ import {
     BoxProps,
     FlexProps,
     Button,
+    Input,
 } from "@chakra-ui/react";
 import {
     FiHome,
@@ -24,16 +24,19 @@ import {
     FiMenu,
 } from "react-icons/fi";
 import { IconType } from "react-icons";
-import { ReactText } from "react";
+import { ReactText, useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../redux/store";
+import { getRooms } from "../redux/rooms/rooms";
+import { Link } from "react-router-dom";
 
 interface LinkItemProps {
     name: string;
-    icon: IconType;
 }
-const LinkItems: Array<LinkItemProps> = [{ name: "Общий", icon: FiHome }];
+const LinkItems: Array<LinkItemProps> = [{ name: "Общий" }];
 
 export default function Sidebar() {
     const { isOpen, onOpen, onClose } = useDisclosure();
+
     return (
         <Box
             position={"fixed"}
@@ -70,6 +73,14 @@ interface SidebarProps extends BoxProps {
 }
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
+    const dispatch = useAppDispatch();
+    const rooms = useAppSelector((state) => state.rooms.data);
+    const [roomName, setRoomName] = useState("");
+
+    useEffect(() => {
+        dispatch(getRooms());
+    }, []);
+
     return (
         <Box
             bg={useColorModeValue("white", "gray.900")}
@@ -94,12 +105,22 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
                     onClick={onClose}
                 />
             </Flex>
-            {LinkItems.map((link) => (
-                <NavItem key={link.name} icon={link.icon}>
-                    {link.name}
+            {rooms?.map((room) => (
+                <NavItem roomId={room._id} key={room._id}>
+                    {room.name}
                 </NavItem>
             ))}
+
             <Box p={7}>
+                <Input
+                    value={roomName}
+                    onChange={(e) => {
+                        setRoomName(e.target.value);
+                    }}
+                    type="text"
+                    placeholder="название комнаты"
+                    mb={"10px"}
+                ></Input>
                 <Button w="100%">Создать комнату</Button>
             </Box>
         </Box>
@@ -107,16 +128,12 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
 };
 
 interface NavItemProps extends FlexProps {
-    icon: IconType;
     children: ReactText;
+    roomId: string;
 }
-const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
+const NavItem = ({ roomId, children, ...rest }: NavItemProps) => {
     return (
-        <Link
-            href="#"
-            style={{ textDecoration: "none" }}
-            _focus={{ boxShadow: "none" }}
-        >
+        <Link to={"/room/" + roomId} style={{ textDecoration: "none" }}>
             <Flex
                 align="center"
                 p="4"
@@ -130,16 +147,6 @@ const NavItem = ({ icon, children, ...rest }: NavItemProps) => {
                 }}
                 {...rest}
             >
-                {icon && (
-                    <Icon
-                        mr="4"
-                        fontSize="16"
-                        _groupHover={{
-                            color: "white",
-                        }}
-                        as={icon}
-                    />
-                )}
                 {children}
             </Flex>
         </Link>

@@ -7,8 +7,10 @@ import Registration from "./pages/Registration/Registration";
 import { io } from "socket.io-client";
 import { useAppDispatch, useAppSelector } from "./redux/store";
 import { fetchAuth } from "./redux/user/user";
+import Room from "./pages/Room/Room";
+import Rooms from "./redux/rooms/rooms";
 
-const socket = io();
+const socket = io("http://localhost:4444");
 
 const App = () => {
     const dispatch = useAppDispatch();
@@ -25,7 +27,9 @@ const App = () => {
     return (
         <div>
             <Routes>
-                <Route path="/" element={<Layout />}></Route>
+                <Route path="/" element={<Layout />}>
+                    <Route path="/room/:id" element={<Room />}></Route>
+                </Route>
                 <Route path="/registration" element={<Registration />}></Route>
                 <Route path="/login" element={<Login />}></Route>
             </Routes>
